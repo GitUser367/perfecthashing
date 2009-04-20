@@ -10,7 +10,10 @@ int main() {
          << "          Welcome in PSH demo program" << endl
          << "=====================================================" << endl << endl;
 
-	CImg<unsigned char> image("../data/sample.bmp");
+	//CImg<unsigned char> image("../data/sample.bmp");
+
+	CImg<unsigned char> image("../data/heron.bmp");
+	image.resize_halfXY();
 
 	PSH psh_example(image);
 	psh_example.perform();

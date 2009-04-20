@@ -9,7 +9,31 @@ PSH::PSH(CImg<unsigned char> image) {
     //Random values generator initialization
 	srand(time(NULL));
 
-	assert(image.width == image.height);			//We only use square images !
+	// Resizing to a square picture, filling with white pixels...
+
+	if (image.width != image.height) {
+        this->image.resize(max(image.width, image.height),max(image.width, image.height),1,image.dim,0);
+        if (image.width<image.height){
+            for (unsigned int i=image.width;i<image.height;i++) {
+                for (unsigned int j=0;j<image.height;j++){
+                    for (unsigned int k=0;k<image.dim;k++)
+                        this->image(i,j,k) = 255;
+                }
+            }
+
+        } else {
+            for (unsigned int i=0;i<image.width;i++) {
+                for (unsigned int j=image.height;j<image.width;j++){
+                    for (unsigned int k=0;k<image.dim;k++)
+                        this->image(i,j,k) = 255;
+                }
+            }
+
+        }
+	}
+
+	//this->image.display();
+
 
 }
 
@@ -37,11 +61,9 @@ int PSH::perfect_hashing(CImg<unsigned char> &hash, CImg<unsigned char> &offsets
 
 	//Calcul des cardinaux des ensembles h1^(-1)(q)
 	CImg<int> cards(r, r, 1, 1, 0);
-	for (int i=0; i<u; ++i)
-	{
-		for (int j=0; j<u; ++j)
-		{
-			if (image(i,j) != 255)
+	for (int i=0; i<u; ++i){
+		for (int j=0; j<u; ++j){
+			if (non_white_pixel(image,i,j))
 				cards(i%r, j%r)++;
 		}
 	}
@@ -74,6 +96,8 @@ int PSH::perfect_hashing(CImg<unsigned char> &hash, CImg<unsigned char> &offsets
 	std::vector<Point> points;	//Positions in hash table
 	std::vector<Point> valid_translations;
 	int nb_points = 0;
+	vector<unsigned char> col;
+	col.resize(image.dim);
 	for (int j=0; j<r; ++j)
 	{
 		for (int i=0; i<r; ++i)
@@ -89,13 +113,13 @@ int PSH::perfect_hashing(CImg<unsigned char> &hash, CImg<unsigned char> &offsets
 
 			//Search all points of h^(-1)(x,y)
 			points.clear();
-			for (int k=x; k<u; k+=r)
-			{
-				for (int l=y; l<u; l+=r)
-				{
-					unsigned char col = image(k,l);
-					if (col != 255)
+			for (int k=x; k<u; k+=r){
+				for (int l=y; l<u; l+=r){
+				    if (non_white_pixel(image,k,l)) {
+				        for (unsigned dim_ind=0;dim_ind<image.dim;dim_ind++)
+				            col.push_back(image(k,l,dim_ind));
 						points.push_back(Point(k%m, l%m, col));
+				    }
 				}
 			}
 			if (VERBOSE)
@@ -104,20 +128,17 @@ int PSH::perfect_hashing(CImg<unsigned char> &hash, CImg<unsigned char> &offsets
 
 			//Search for possible translations (the ones with no collisions)
 			valid_translations.clear();
-			for (int k=0; k<m; ++k)
-			{
-				for (int l=0; l<m; ++l)
-				{
+			for (int k=0; k<m; ++k){
+				for (int l=0; l<m; ++l){
 					// Is (k,l) a valid translation?
 					bool valid = true;
-					for (unsigned int s=0; s<points.size(); ++s)
-					{
+					for (unsigned int s=0; s<points.size(); ++s){
 						Point p = points[s];
-						if (hash((p.x+k)%m, (p.y+l)%m) != 255)
-						{
-							valid = false;
-							break;
-						}
+                        if (non_white_pixel(hash,(p.x+k)%m, (p.y+l)%m)){
+                            valid = false;
+                            break;
+                        }
+
 					}
 
 					if (valid)
@@ -150,7 +171,8 @@ int PSH::perfect_hashing(CImg<unsigned char> &hash, CImg<unsigned char> &offsets
 			for (unsigned int s=0; s<points.size(); ++s)
 			{
 				Point p = points[s];
-				hash((p.x+off_x)%m, (p.y+off_y)%m) = p.color;
+				for (unsigned int k=0;k<image.dim;k++)
+                    hash((p.x+off_x)%m, (p.y+off_y)%m,k) = p.color[k];
 			}
 
 			if (VERBOSE)
@@ -174,24 +196,22 @@ int PSH::perform()
 {
     int u = image.width;
 
-	//Finds number of non-0 points
+	//Finds number of non-white pixels
 	int n = 0;
-	for (int i=0; i<u; ++i)
-	{
-		for (int j=0; j<u; ++j)
-		{
-			if (image(i,j) != 255)
-				n++;
+	for (int i=0; i<u; ++i){
+		for (int j=0; j<u; ++j){
+            if (non_white_pixel(image,i,j))
+                n++;
 		}
 	}
 
-	cout << "Image " << u << "x" << u << "  " << n << "/" << u*u << " non white pixels." << endl;
+	cout << "Image " << u << "x" << u << "x" << image.dim << "  " << n << "/" << u*u << " non white pixels." << endl;
 
 
 	//Hashing table declaration
 	int m = ceil(sqrt((double) n));
 	cout << "Hashing table: " << m << "x" << m << endl << endl;
-	CImg<unsigned char> hash(m, m, 1, 1, 255);
+	CImg<unsigned char> hash(m, m, 1, image.dim, 255);
 
 	//Offset table declaration
 	CImg<unsigned char> offsets;
@@ -320,4 +340,14 @@ int PSH::perform()
 
 	//getchar();
 	return 0;
+}
+
+bool PSH::non_white_pixel(CImg<unsigned char> &img, int i,int j){
+    bool non_white = false;
+    for (unsigned int k=0;k<img.dim;k++){
+        if (img(i,j,k)!=255)
+            non_white = true;
+    }
+    return non_white;
+
 }
