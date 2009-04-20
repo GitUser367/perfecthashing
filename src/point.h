@@ -3,11 +3,14 @@
 
 #pragma once
 
+#include <vector>
+using namespace std;
+
 //Classe point (avec éventuellement une couleur associée)
 class Point
 {
 public:
-	Point(int u, int v, unsigned char col=0)
+	Point(int u, int v, vector<unsigned char> col = vector<unsigned char>())
 	{
 		this->x = u;
 		this->y = v;
@@ -25,7 +28,7 @@ public:
 
 	int x;
 	int y;
-	unsigned char color;
+	vector<unsigned char> color;
 };
 
 #endif

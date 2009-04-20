@@ -38,6 +38,7 @@ public:
 private:
 
     int perfect_hashing(CImg<unsigned char> &hash, CImg<unsigned char> &offsets, int &n, int &m, int &u, int &r);
+    bool non_white_pixel(CImg<unsigned char> &img, int i, int j);
 
 
 
