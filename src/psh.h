@@ -7,6 +7,7 @@
 #include <vector>
 #include <iostream>
 
+#include "math_tools.h"
 
 #include "point.h"
 
@@ -17,9 +18,7 @@
 #define MAX_ESSAIS_COMPACT 5
 
 //Enable binary research (to find minimal size)
-//#define COMPACT
-
-#include "math_tools.h"
+#define COMPACT
 
 //Enable / Disable output saving
 #define SAVE_OUTPUT 1
@@ -36,19 +35,9 @@ public:
     int perform();
 
 
-
-
-
 private:
 
     int perfect_hashing(CImg<unsigned char> &hash, CImg<unsigned char> &offsets, int &n, int &m, int &u, int &r);
-
-
-
-
-
-
-
 
 
 

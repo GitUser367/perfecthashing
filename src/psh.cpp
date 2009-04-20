@@ -18,13 +18,13 @@ PSH::PSH(CImg<unsigned char> image) {
 int PSH::perfect_hashing(CImg<unsigned char> &hash, CImg<unsigned char> &offsets, int &n, int &m, int &u, int &r){
     /**
      * Main algorithm
-     * @image : original image
-     * @hash  : hash table
-     * @offsets : offset table
-     * @n : non-0 data size
-     * @m : hash table size
-     * @u : original image size
-     * @r : offset table size
+     * @image: original image
+     * @hash: hash table
+     * @offsets: offset table
+     * @n: non-0 data size
+     * @m: hash table size
+     * @u: original image size
+     * @r: offset table size
      **/
 
 	//Hashing table initialization
@@ -33,7 +33,7 @@ int PSH::perfect_hashing(CImg<unsigned char> &hash, CImg<unsigned char> &offsets
 	//Offset table declaration
 	assert((u <= m*r) && (pgcd(m,r) == 1));								// Otherwise no injectivity of S -> (h0, h1) !
 	offsets.assign(r, r, 1, 2, 0);
-	cout << "Offset table : " << r << "x" << r << endl;
+	cout << "Offset table: " << r << "x" << r << endl;
 
 	//Calcul des cardinaux des ensembles h1^(-1)(q)
 	CImg<int> cards(r, r, 1, 1, 0);
@@ -85,7 +85,7 @@ int PSH::perfect_hashing(CImg<unsigned char> &hash, CImg<unsigned char> &offsets
 			int y = pos/r;
 
 			if (VERBOSE)
-				cout << "Position in offset table : " << x << " " << y << endl;
+				cout << "Position in offset table: " << x << " " << y << endl;
 
 			//Search all points of h^(-1)(x,y)
 			points.clear();
@@ -190,7 +190,7 @@ int PSH::perform()
 
 	//Hashing table declaration
 	int m = ceil(sqrt((double) n));
-	cout << "Hashing table : " << m << "x" << m << endl << endl;
+	cout << "Hashing table: " << m << "x" << m << endl << endl;
 	CImg<unsigned char> hash(m, m, 1, 1, 255);
 
 	//Offset table declaration
@@ -229,7 +229,7 @@ int PSH::perform()
 		int i;
 		for (i=0; i<MAX_ESSAIS_COMPACT; ++i)
 		{
-			if (perfect_hashing(image, hash, offsets, n, m, u, r) == 1)
+			if (perfect_hashing(hash, offsets, n, m, u, r) == 1)
 			{
 				success = true;
 				cout << endl;
