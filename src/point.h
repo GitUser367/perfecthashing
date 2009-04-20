@@ -1,6 +1,9 @@
+#ifndef POINT_H
+#define POINT_H
+
 #pragma once
 
-//Classe point (avec éventuellement une couleur associée)
+//Classe point (avec Ã©ventuellement une couleur associÃ©e)
 class Point
 {
 public:
@@ -24,3 +27,5 @@ public:
 	int y;
 	unsigned char color;
 };
+
+#endif
