@@ -117,7 +117,7 @@ int PSH::perfect_hashing(CImg<unsigned char> &hash, CImg<unsigned char> &offsets
 				for (int l=y; l<u; l+=r){
 				    if (non_white_pixel(image,k,l)) {
 				        for (unsigned dim_ind=0;dim_ind<image.dim;dim_ind++)
-				            col.push_back(image(k,l,dim_ind));
+				            col[dim_ind] = image(k,l,dim_ind);
 						points.push_back(Point(k%m, l%m, col));
 				    }
 				}
@@ -343,11 +343,10 @@ int PSH::perform()
 }
 
 bool PSH::non_white_pixel(CImg<unsigned char> &img, int i,int j){
-    bool non_white = false;
     for (unsigned int k=0;k<img.dim;k++){
         if (img(i,j,k)!=255)
-            non_white = true;
+            return true;
     }
-    return non_white;
+    return false;
 
 }
