@@ -12,16 +12,14 @@
 #include "point.h"
 
 //Enable / Disable debug statements
-#define VERBOSE 0
+#define VERBOSE false
 
 //Maximum of attempts of the algorithm for compact mode (5 in the article)
 #define MAX_ESSAIS_COMPACT 5
 
 //Enable binary research (to find minimal size)
-#define COMPACT
+//#define COMPACT
 
-//Enable / Disable output saving
-#define SAVE_OUTPUT 1
 
 using namespace std;
 using namespace cimg_library;
@@ -33,12 +31,17 @@ public:
     PSH(CImg<unsigned char> image);
 
     int perform();
+    void display();
+
+    void save(string prefix);
 
 
 private:
 
     int perfect_hashing(CImg<unsigned char> &hash, CImg<unsigned char> &offsets, int &n, int &m, int &u, int &r);
-    bool non_white_pixel(CImg<unsigned char> &img, int i, int j);
+    inline bool non_white_pixel(CImg<unsigned char> &img, int i, int j);
+    CImg<unsigned char> hash;
+    CImg<unsigned char> offsets;
 
 
 
