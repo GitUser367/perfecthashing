@@ -338,9 +338,9 @@ void PSH::display(){
     }
 
 void PSH::save(string prefix){
-    string filename = "../Output/"+prefix+" - Hash Table.bmp";
+    string filename = "../Output/"+prefix+" - Hash Table.jpg";
     hash.save(filename.c_str());
-    filename = "../Output/"+prefix+ " - Offset Table.bmp";
+    filename = "../Output/"+prefix+ " - Offset Table.jpg";
     offsets.save(filename.c_str());
 
 }
