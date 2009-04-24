@@ -116,9 +116,7 @@ int PSH::perfect_hashing(CImg<unsigned char> &hash, CImg<unsigned char> &offsets
 			for (int k=x; k<u; k+=r){
 				for (int l=y; l<u; l+=r){
 				    if (non_white_pixel(image,k,l)) {
-				        for (unsigned dim_ind=0;dim_ind<image.dim;dim_ind++)
-				            col[dim_ind] = image(k,l,dim_ind);
-						points.push_back(Point(k%m, l%m, col));
+						points.push_back(Point(k, l));
 				    }
 				}
 			}
@@ -171,8 +169,9 @@ int PSH::perfect_hashing(CImg<unsigned char> &hash, CImg<unsigned char> &offsets
 			for (unsigned int s=0; s<points.size(); ++s)
 			{
 				Point p = points[s];
-				for (unsigned int k=0;k<image.dim;k++)
-                    hash((p.x+off_x)%m, (p.y+off_y)%m,k) = p.color[k];
+				for (unsigned int k=0;k<image.dim;k++){
+                    hash((p.x+off_x)%m, (p.y+off_y)%m,int(k)) = image(p.x,p.y,k);
+				}
 			}
 
 			if (VERBOSE)
@@ -211,10 +210,7 @@ int PSH::perform()
 	//Hashing table declaration
 	int m = ceil(sqrt((double) n));
 	cout << "Hashing table: " << m << "x" << m << endl << endl;
-	CImg<unsigned char> hash(m, m, 1, image.dim, 255);
-
-	//Offset table declaration
-	CImg<unsigned char> offsets;
+	hash.assign(m, m, 1, image.dim, 255);
 
 	//Initialization of r
 	int r = ceil(sqrt(1.*n/4));
@@ -328,21 +324,30 @@ int PSH::perform()
 #endif
 
 
-    hash.display("Hash Table");
 
 
-    offsets.display("Offset Table");
-
-    if (SAVE_OUTPUT) {
-        hash.save("../Output/Hash Table.bmp");
-        offsets.save("../Output/Offset Table.bmp");
-    }
 
 	//getchar();
 	return 0;
 }
 
-bool PSH::non_white_pixel(CImg<unsigned char> &img, int i,int j){
+
+void PSH::display(){
+    hash.display("Hash Table");
+    offsets.display("Offset Table");
+    }
+
+void PSH::save(string prefix){
+    string filename = "../Output/"+prefix+" - Hash Table.bmp";
+    hash.save(filename.c_str());
+    filename = "../Output/"+prefix+ " - Offset Table.bmp";
+    offsets.save(filename.c_str());
+
+}
+
+
+
+inline bool PSH::non_white_pixel(CImg<unsigned char> &img, int i,int j){
     for (unsigned int k=0;k<img.dim;k++){
         if (img(i,j,k)!=255)
             return true;
