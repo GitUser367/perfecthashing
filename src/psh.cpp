@@ -333,7 +333,11 @@ void PSH::display(){
     CImgList<unsigned char> list(image,hash,offsets);
     CImgDisplay disp(list,"Image - Hash Table - Offset Table");
     while (!disp.is_closed)
+    #if defined(WIN32) || defined(WIN64)
+        Sleep(1);
+    #else
         usleep(1e3);
+    #endif
     }
 
 
