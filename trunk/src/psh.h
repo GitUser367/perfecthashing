@@ -3,6 +3,7 @@
 #include <math.h>
 #include <assert.h>
 #include <time.h>
+#include <string>
 
 #include <vector>
 #include <iostream>
