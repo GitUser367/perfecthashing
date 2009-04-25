@@ -10,9 +10,9 @@ int main() {
          << "          Welcome in PSH demo program" << endl
          << "=====================================================" << endl << endl;
 
-	CImg<unsigned char> image("../data/heron.bmp");
-/*
-	CImg<unsigned char> image("../data/Color dots.bmp");
+    string core_name = "Color dots";
+    string filename = "../data/"+core_name + ".bmp";
+	CImg<unsigned char> image(filename.c_str());
 
     // Thresholding maison (pour des images plus sparses! ^^)
     for (unsigned int x=0;x<image.height;x++){
@@ -24,16 +24,16 @@ int main() {
         }
     }
 
-*/
+
 	PSH psh_example(image);
 	psh_example.perform();
-	//psh_example.display();
-	psh_example.save("Heron");
+	psh_example.display();
+	psh_example.save(core_name.c_str());
 
 
-    cout << "=====================================================" << endl
-         << "     That's the end folks, I hope you enjoyed it!" << endl
-         << "=====================================================" << endl << endl;
+    cout << endl << "=====================================================" << endl
+                 << "     That's the end folks, I hope you enjoyed it!" << endl
+                 << "=====================================================" << endl << endl;
 
 
     return 0;
