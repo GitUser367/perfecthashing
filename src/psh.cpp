@@ -324,25 +324,24 @@ int PSH::perform()
 #endif
 
 
-
-
-
 	//getchar();
 	return 0;
 }
 
 
 void PSH::display(){
-    hash.display("Hash Table");
-    offsets.display("Offset Table");
+    CImgList<unsigned char> list(image,hash,offsets);
+    CImgDisplay disp(list,"Image - Hash Table - Offset Table");
+    while (!disp.is_closed)
+        usleep(1e3);
     }
+
 
 void PSH::save(string prefix){
     string filename = "../Output/"+prefix+" - Hash Table.jpg";
     hash.save(filename.c_str());
     filename = "../Output/"+prefix+ " - Offset Table.jpg";
     offsets.save(filename.c_str());
-
 }
 
 
