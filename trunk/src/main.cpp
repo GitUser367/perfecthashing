@@ -5,13 +5,18 @@
 using namespace std;
 using namespace cimg_library;
 
-int main() {
+int main(int argc, char** argv) {
     cout << "=====================================================" << endl
          << "          Welcome in PSH demo program" << endl
-         << "=====================================================" << endl << endl;
+         << "=====================================================" << endl << endl
+         << "usage: " << endl
+		 << argv[0] << " input output_prefix" << endl
+		 << argv[0] << " input output_hashmap output_offset" << endl << endl;
 
     string core_name = "Color dots";
     string filename = "../data/"+core_name + ".bmp";
+	if (argc >= 2)
+		filename = argv[1];
 	CImg<unsigned char> image(filename.c_str());
 
     // Thresholding maison (pour des images plus sparses! ^^)
@@ -28,7 +33,15 @@ int main() {
 	PSH psh_example(image);
 	psh_example.perform();
 	psh_example.display();
-	psh_example.save(core_name.c_str());
+	if (argc < 3)
+		psh_example.save(core_name.c_str());
+	else if (argc == 3)
+	{
+		core_name = argv[2];
+		psh_example.save(core_name);
+	}
+	else if (argc == 4)
+		psh_example.save(argv[2], argv[3]);
 
 
     cout << endl << "=====================================================" << endl

@@ -340,11 +340,16 @@ void PSH::display(){
     #endif
     }
 
+void PSH::save(const char* hash_fname, const char* offsets_fname)
+{
+	hash.save(hash_fname);	
+	offsets.save(offsets_fname);
+}
 
 void PSH::save(string prefix){
-    string filename = "../Output/"+prefix+" - Hash Table.jpg";
+    string filename = prefix+" - Hash Table.jpg";
     hash.save(filename.c_str());
-    filename = "../Output/"+prefix+ " - Offset Table.jpg";
+    filename = prefix+ " - Offset Table.jpg";
     offsets.save(filename.c_str());
 }
 

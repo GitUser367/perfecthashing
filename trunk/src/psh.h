@@ -35,6 +35,7 @@ public:
     void display();
 
     void save(string prefix);
+    void save(const char* hash_fname, const char* offsets_fname);
 
 
 private:
