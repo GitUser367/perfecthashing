@@ -208,12 +208,12 @@ int PSH::perform()
 
 
 	//Hashing table declaration
-	int m = ceil(sqrt((double) n));
+	int m = (int)ceil(sqrt((double) n));
 	cout << "Hashing table: " << m << "x" << m << endl << endl;
 	hash.assign(m, m, 1, image.dim, 255);
 
 	//Initialization of r
-	int r = ceil(sqrt(1.*n/4));
+	int r = (int)ceil(sqrt(1.*n/4));
 	while (pgcd(r, m) != 1)
 		r++;
 
@@ -222,7 +222,7 @@ int PSH::perform()
 	while (perfect_hashing(hash, offsets, n, m, u, r) == 0)
 	{
 		cout << endl;
-		r = ceil(r*1.2);
+		r = (int)ceil(r*1.2);
 		while (pgcd(r, m) != 1)
 			r++;
 	}
@@ -336,7 +336,7 @@ void PSH::display(){
     #if defined(WIN32) || defined(WIN64)
         Sleep(1);
     #else
-        usleep(1e3);
+        usleep(1000);
     #endif
     }
 
