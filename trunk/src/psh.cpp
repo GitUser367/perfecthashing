@@ -347,9 +347,9 @@ void PSH::save(const char* hash_fname, const char* offsets_fname)
 }
 
 void PSH::save(string prefix){
-    string filename = prefix+" - Hash Table.jpg";
+    string filename = prefix+" - Hash Table.bmp";
     hash.save(filename.c_str());
-    filename = prefix+ " - Offset Table.jpg";
+    filename = prefix+ " - Offset Table.bmp";
     offsets.save(filename.c_str());
 }
 

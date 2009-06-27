@@ -54,7 +54,7 @@ int main(int argc, char** argv) {
 	if (argc == 3)
 	{
 		core_name = argv[2];
-		string fname = core_name + "_coverage.jpg";
+		string fname = core_name + "_coverage.bmp";
 		coverage.save(fname.c_str());
 	}
 	else if (argc == 5)
