@@ -41,20 +41,30 @@ int main(int argc, char** argv) {
 					int offx = offset(rx, ry, rz, 0);
 					int offy = offset(rx, ry, rz, 1);
 					int offz = 0;
-					if (coverage.dimz() != 1)
+					//if (coverage.dimz() != 1)
 					{
 						offz = offset(rx, ry, rz, 2);
 					}
+					if (offz != 0)
+					{
+						cout << "Error looking up offset at " << x << ", " << y << " got a blue pixel!" << endl;
+					}	
 					int px = (x + offx) % hash.dimx();
 					int py = (y + offy) % hash.dimy();
 					int pz = (z + offz) % hash.dimz();
+					bool allwhite = true;
 					for (int v=0;v<hash.dimv();v++){
 						output(x,y,z,v) = hash(px,py,pz,v);
+						if (output(x,y,z,v) != 255)
+							allwhite = false;
 					}
+					if (allwhite)
+						cout << "Error looking up hash at " << x << ", " << y << " got a white pixel!" << endl;
+
 				}
 				else{
 					for (int v=0;v<hash.dimv();v++){
-						output(x,y,z,v) = 255;
+						output(x,y,z,v) = (v&1)? 255 : 255; // change to 0:255 if you want
 					}
 				}
             }
