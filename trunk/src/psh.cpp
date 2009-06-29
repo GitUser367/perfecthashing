@@ -53,10 +53,22 @@ int PSH::perfect_hashing(CImg<unsigned char> &hash, CImg<unsigned char> &offsets
 
 	//Hashing table initialization
 	hash.fill(255);
+	for (int z = 0; z < hash.dimz(); z++)
+		for (int y = 0; y < hash.dimy(); y++)
+			for (int x = 0; x < hash.dimx(); x++)
+				for (int v = 0; v < hash.dimv(); v++)
+				{	
+				//	hash(x,y,z,v) = (v & 1) ? 0 : 255; // green
+				}
 
 	//Offset table declaration
 	assert((u <= m*r) && (pgcd(m,r) == 1));								// Otherwise no injectivity of S -> (h0, h1) !
-	offsets.assign(r, r, 1, 2, 0);
+	offsets.assign(r, r, 1, 3, 0);
+	for (int z = 0; z < offsets.dimz(); z++)
+		for (int y = 0; y < offsets.dimy(); y++)
+			for (int x = 0; x < offsets.dimx(); x++)
+				offsets(x,y,z,2) = 255; // set the blue, it will be cleared when filled 
+				
 	cout << "Offset table: " << r << "x" << r << endl;
 
 	//Calcul des cardinaux des ensembles h1^(-1)(q)
@@ -126,8 +138,9 @@ int PSH::perfect_hashing(CImg<unsigned char> &hash, CImg<unsigned char> &offsets
 
 			//Search for possible translations (the ones with no collisions)
 			valid_translations.clear();
-			for (int k=0; k<m; ++k){
-				for (int l=0; l<m; ++l){
+			int max_value = min(m, 255);
+			for (int k=0; k<max_value; ++k){
+				for (int l=0; l<max_value; ++l){
 					// Is (k,l) a valid translation?
 					bool valid = true;
 					for (unsigned int s=0; s<points.size(); ++s){
@@ -162,8 +175,13 @@ int PSH::perfect_hashing(CImg<unsigned char> &hash, CImg<unsigned char> &offsets
 			//Offset assignment
 			int off_x = offset.x;
 			int off_y = offset.y;
+			if (off_x > 255 || off_y > 255)
+			{
+				cout << "unsigned char overflow for pixel" << endl;
+			}
 			offsets(x,y,0,0) = off_x;
 			offsets(x,y,0,1) = off_y;
+			offsets(x,y,0,2) = 0; // clear the blue to mark as filled
 
 			//Hash table assignment
 			for (unsigned int s=0; s<points.size(); ++s)
@@ -209,6 +227,8 @@ int PSH::perform()
 
 	//Hashing table declaration
 	int m = (int)ceil(sqrt((double) n));
+	if (m > 255) // the 8 bit offsets will limit the range in the hash table
+		m = (int)ceil(sqrt((double) n * 1.01)); // make the table slightly larger, section 4.1 of the paper
 	cout << "Hashing table: " << m << "x" << m << endl << endl;
 	hash.assign(m, m, 1, image.dim, 255);
 
