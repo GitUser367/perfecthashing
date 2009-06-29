@@ -1,5 +1,5 @@
 CC		= g++
-FLAGS	= -Wall -O2
+FLAGS	= -Wall -O2 -Dcimg_use_png
 SOURCES	= psh.cpp math_tools.cpp
 OBJECTS	= psh.o math_tools.o 
 TARGET	= ../binary/libpsh.a
