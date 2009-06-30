@@ -3,6 +3,14 @@
 #include "CImg.h"
 #include <iostream>
 
+//#define TEXTYPE_2DRECT
+
+#ifdef TEXTYPE_2DRECT
+#define TEXTURE GL_TEXTURE_RECTANGLE_ARB
+#else
+#define TEXTURE GL_TEXTURE_2D
+#endif
+
 using namespace cimg_library;
 
 void display();
@@ -19,7 +27,7 @@ static const char m_vertex[] = "void main()\n"
 		"	gl_TexCoord[0] = gl_MultiTexCoord0;\n"
 		"}\n";
 
-static const char m_fragment[] = 
+static const char m_fragment_2Drect[] = 
 		"#extension GL_ARB_texture_rectangle : enable\n"
 		"uniform sampler2DRect coverage, hash, offsets;\n"
 		"uniform float hash_width, offsets_width;\n"
@@ -38,6 +46,38 @@ static const char m_fragment[] =
 		"		vec4 color = texture2DRect(hash, mod(gl_TexCoord[0].xy + off.xy, hash_width));\n"
 		"		gl_FragColor = color;\n"
 		"	}\n"
+		"}\n";
+
+static const char m_fragment_2D[] = 
+		"uniform sampler2D coverage, hash, offsets;\n"
+		"uniform float hash_scale, offsets_scale, oscale;\n"
+		"uniform vec2 u_width;\n"
+		"bool testCoverage(vec4 coverage)\n"
+		"{\n"
+		"	if (coverage.r == 0.)\n"
+		"		return false;\n"
+		"	else\n"
+		"		return true;\n"
+		"}\n"
+		"vec2 ComputeHash(vec2 p)\n"
+		"{\n"
+		"	vec2 h0 = hash_scale * p;\n"
+		"	vec2 h1 = offsets_scale * p;\n"
+		"	vec2 offset = texture2D(offsets, h1).xy * oscale;\n"
+		"	return h0 + offset;\n"
+		"}\n"
+		"void main()\n"
+		"{\n"
+		"	vec4 coverage = texture2D(coverage, gl_TexCoord[0].xy);\n"
+		"	if (testCoverage(coverage))\n"
+		"	{\n"
+		"		vec2 h = ComputeHash((gl_TexCoord[0].xy * u_width));\n"
+		"		gl_FragColor = texture2D(hash, h);\n"
+		"//		gl_FragColor.xy = texture2D(hash, h);\n"
+		"//		gl_FragColor.xy = h;\n"
+		"	}\n"
+		"	else\n"
+		"		gl_FragColor = coverage;\n"
 		"}\n";
 
 
@@ -67,7 +107,11 @@ int main(int argc, char** argv)
 	g_hash = makeTexture(hash, GL_RGBA);
 	g_offsets = makeTexture(offsets, GL_RGBA);
 	g_coverage = makeTexture(coverage, GL_RGBA);
-	g_program = makeShader(m_vertex, m_fragment);
+#ifdef TEXTYPE_2DRECT
+	g_program = makeShader(m_vertex, m_fragment_2Drect);
+#else
+	g_program = makeShader(m_vertex, m_fragment_2D);
+#endif
 
 	glutDisplayFunc(display);
 	glutReshapeFunc(reshape);
@@ -91,48 +135,72 @@ void display(void)
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glEnable(GL_TEXTURE_RECTANGLE_ARB);
 
 	int error;
 	while ((error = glGetError()) != 0)
 	{
 		std::cout << "Before:" << gluErrorString(error) << std::endl;
 	}
-	int left = 0;
-	int width = coverage.dimx();
-	int height = coverage.dimy();
 	glUseProgramObjectARB(g_program);
+	glEnable(TEXTURE);
 	GLuint loc = glGetUniformLocationARB(g_program, "coverage");
 	std::cout << "location for coverage: " << loc << std::endl;
 	glUniform1iARB(loc, 0); // texture unit 0
 	loc = glGetUniformLocationARB(g_program, "hash");
 	std::cout << "location for hash: " << loc << std::endl;
-	glUniform1iARB(loc, 1); // texture unit 0
+	glUniform1iARB(loc, 1); // texture unit 1
 	loc = glGetUniformLocationARB(g_program, "offsets");
 	std::cout << "location for offsets: " << loc << std::endl;
-	glUniform1iARB(loc, 2); // texture unit 0
+	glUniform1iARB(loc, 2); // texture unit 2
+#ifdef TEXTYPE_2DRECT
 	loc = glGetUniformLocationARB(g_program, "hash_width");
 	std::cout << "location for hash width: " << loc << std::endl;
 	glUniform1fARB(loc, (float)hash.dimx());
 	loc = glGetUniformLocationARB(g_program, "offsets_width");
 	std::cout << "location for offsets_width: " << loc << std::endl;
 	glUniform1fARB(loc, (float)offsets.dimx());
+#else
+	loc = glGetUniformLocationARB(g_program, "hash_scale");
+	std::cout << "location for hash scale: " << loc << std::endl;
+	glUniform1fARB(loc, (float)1.0/hash.dimx());
+	loc = glGetUniformLocationARB(g_program, "offsets_scale");
+	std::cout << "location for offsets scale: " << loc << std::endl;
+	glUniform1fARB(loc, (float)1.0/offsets.dimx());
+	loc = glGetUniformLocationARB(g_program, "u_width");
+	std::cout << "location for u_width: " << loc << std::endl;
+	glUniform2fARB(loc, (float)coverage.dimx(), (float)coverage.dimy());
+	loc = glGetUniformLocationARB(g_program, "oscale");
+	std::cout << "location for oscale: " << loc << std::endl;
+	glUniform1fARB(loc, (float)255.0/hash.dimx());
+#endif
+
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_RECTANGLE_ARB, g_coverage);
-	glEnable(GL_TEXTURE_RECTANGLE_ARB);
+	glBindTexture(TEXTURE, g_coverage);
+	glEnable(TEXTURE);
 	glActiveTexture(GL_TEXTURE1);
-	glEnable(GL_TEXTURE_RECTANGLE_ARB);
-	glBindTexture(GL_TEXTURE_RECTANGLE_ARB, g_hash);
+	glEnable(TEXTURE);
+	glBindTexture(TEXTURE, g_hash);
 	glActiveTexture(GL_TEXTURE2);
-	glEnable(GL_TEXTURE_RECTANGLE_ARB);
-	glBindTexture(GL_TEXTURE_RECTANGLE_ARB, g_offsets);
+	glEnable(TEXTURE);
+	glBindTexture(TEXTURE, g_offsets);
 	glActiveTexture(GL_TEXTURE0);
+	int left = 0;
+	int width = coverage.dimx();
+	int height = coverage.dimy();
+#ifdef TEXTYPE_2DRECT
+	int right = width;
+	int top = height;
+#else
+	int right = 1;
+	int top = 1;
+#endif
+
 	glBegin(GL_QUADS);
-		glTexCoord2i(0, height);
+		glTexCoord2i(0, top);
 		glVertex2i(left, 0);
-		glTexCoord2i(width, height);
+		glTexCoord2i(right, top);
 		glVertex2i(left + width, 0);
-		glTexCoord2i(width, 0);
+		glTexCoord2i(right, 0);
 		glVertex2i(left + width, height);
 		glTexCoord2i(0, 0);
 		glVertex2i(left, height);
@@ -143,21 +211,28 @@ void display(void)
 		gluErrorString(error);
 	}
 	glUseProgramObjectARB(0);
-	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_RECTANGLE_ARB, 0);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_RECTANGLE_ARB, 0);
-	glActiveTexture(GL_TEXTURE0);
 	left += width;
 	width = hash.dimx();
 	height = hash.dimy();
-	glBindTexture(GL_TEXTURE_RECTANGLE_ARB, g_hash);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(TEXTURE, 0);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(TEXTURE, 0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(TEXTURE, g_hash);
+#ifdef TEXTYPE_2DRECT
+	right = width;
+	top = height;
+#else
+	right = 1;
+	top = 1;
+#endif
 	glBegin(GL_QUADS);
-		glTexCoord2i(0, height);
+		glTexCoord2i(0, top);
 		glVertex2i(left, 0);
-		glTexCoord2i(width, height);
+		glTexCoord2i(right, top);
 		glVertex2i(left + width, 0);
-		glTexCoord2i(width, 0);
+		glTexCoord2i(right, 0);
 		glVertex2i(left + width, height);
 		glTexCoord2i(0, 0);
 		glVertex2i(left, height);
@@ -165,20 +240,27 @@ void display(void)
 	left += width;
 	width = offsets.dimx();
 	height = offsets.dimy();
-	glBindTexture(GL_TEXTURE_RECTANGLE_ARB, g_offsets);
+	glBindTexture(TEXTURE, g_offsets);
+#ifdef TEXTYPE_2DRECT
+	right = width;
+	top = height;
+#else
+	right = 1;
+	top = 1;
+#endif
 	glBegin(GL_QUADS);
-		glTexCoord2i(0, height);
+		glTexCoord2i(0, top);
 		glVertex2i(left, 0);
-		glTexCoord2i(width, height);
+		glTexCoord2i(right, top);
 		glVertex2i(left + width, 0);
-		glTexCoord2i(width, 0);
+		glTexCoord2i(right, 0);
 		glVertex2i(left + width, height);
 		glTexCoord2i(0, 0);
 		glVertex2i(left, height);
 	glEnd();
 
-	glDisable(GL_TEXTURE_RECTANGLE_ARB);
-	glBindTexture(GL_TEXTURE_RECTANGLE_ARB, 0);
+	glDisable(TEXTURE);
+	glBindTexture(TEXTURE, 0);
 
 	glutSwapBuffers();
 }
@@ -214,12 +296,16 @@ GLuint makeTexture(const CImg<unsigned char>& img, GLenum format)
 			dataFormat = GL_RGBA;
 			break;
 	}
-
-	GLenum target = GL_TEXTURE_RECTANGLE_ARB;
+	GLenum target = TEXTURE;
 	glGenTextures(1, &tex);
 	glBindTexture(target, tex);
+	#ifdef TEXTYPE_2DRECT
+	glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP);
+	glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	#else
 	glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	#endif
 	glTexParameteri(target, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(target, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexImage2D(target, 0, format, img.dimx(), img.dimy(), 0, dataFormat, GL_UNSIGNED_BYTE, pixels);
