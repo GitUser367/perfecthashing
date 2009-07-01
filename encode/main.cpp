@@ -30,7 +30,7 @@ int main(int argc, char** argv) {
         }
     }
 	*/
-	CImg<unsigned char> coverage(image.dimx(), image.dimy(), image.dimz(), image.dimv(), 0);
+	CImg<unsigned char> coverage(image.dimx(), image.dimy(), image.dimz(), 1, 0);
 	
     for (int x=0;x<image.dimx();x++){
         for (int y=0;y<image.dimy();y++){
@@ -42,12 +42,10 @@ int main(int argc, char** argv) {
 						break;
 					}
 				}
-            	for (int v=0;v<image.dimv();v++){
-                	if (blank)
-						coverage(x,y,z,v) = 0;
-					else
-						coverage(x,y,z,v) = 255;
-				}
+                if (blank)
+					coverage(x,y,z,0) = 0;
+				else
+					coverage(x,y,z,0) = 255;
             }
         }
     }
