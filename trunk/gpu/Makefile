@@ -1,5 +1,5 @@
 CC		= g++
-FLAGS	= -Wall -O2 
+FLAGS	= -Wall -O2 -Dcimg_use_png
 SOURCES	= pshgpu.cpp 
 OBJECTS	= pshgpu.o 
 LIBRARY = -L$(HOME)/install/lib

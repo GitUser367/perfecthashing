@@ -3,7 +3,7 @@
 #include "CImg.h"
 #include <iostream>
 
-//#define TEXTYPE_2DRECT
+#define TEXTYPE_2DRECT
 
 #ifdef TEXTYPE_2DRECT
 #define TEXTURE GL_TEXTURE_RECTANGLE_ARB
@@ -42,7 +42,7 @@ static const char m_fragment_2Drect[] =
 		"	else\n"
 		"	{\n"
 		"		vec4 off = texture2DRect(offsets, (mod(gl_TexCoord[0].xy, offsets_width)));\n"
-		"		off.xy = off.xy * vec2(255.);\n"
+		"		off.xy = off.ra * vec2(255.);\n"
 		"		vec4 color = texture2DRect(hash, mod(gl_TexCoord[0].xy + off.xy, hash_width));\n"
 		"		gl_FragColor = color;\n"
 		"	}\n"
@@ -63,7 +63,7 @@ static const char m_fragment_2D[] =
 		"{\n"
 		"	vec2 h0 = hash_scale * p;\n"
 		"	vec2 h1 = offsets_scale * p;\n"
-		"	vec2 offset = texture2D(offsets, h1).xy * oscale;\n"
+		"	vec2 offset = texture2D(offsets, h1).ra * oscale;\n"
 		"	return h0 + offset;\n"
 		"}\n"
 		"void main()\n"
@@ -105,8 +105,8 @@ int main(int argc, char** argv)
 	// init
 
 	g_hash = makeTexture(hash, GL_RGBA);
-	g_offsets = makeTexture(offsets, GL_RGBA);
-	g_coverage = makeTexture(coverage, GL_RGBA);
+	g_offsets = makeTexture(offsets, GL_LUMINANCE_ALPHA);
+	g_coverage = makeTexture(coverage, GL_LUMINANCE);
 #ifdef TEXTYPE_2DRECT
 	g_program = makeShader(m_vertex, m_fragment_2Drect);
 #else
@@ -277,6 +277,8 @@ GLuint makeTexture(const CImg<unsigned char>& img, GLenum format)
 	
 	GLuint tex;
 	GLenum dataFormat = 0;
+
+	std::cout << "Image dimv: " << img.dimv() << std::endl;
 
 	switch (img.dimv())
 	{

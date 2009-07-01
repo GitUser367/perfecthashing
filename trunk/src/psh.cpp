@@ -53,6 +53,7 @@ int PSH::perfect_hashing(CImg<unsigned char> &hash, CImg<unsigned char> &offsets
 
 	//Hashing table initialization
 	hash.fill(255);
+	/*
 	for (int z = 0; z < hash.dimz(); z++)
 		for (int y = 0; y < hash.dimy(); y++)
 			for (int x = 0; x < hash.dimx(); x++)
@@ -60,15 +61,18 @@ int PSH::perfect_hashing(CImg<unsigned char> &hash, CImg<unsigned char> &offsets
 				{	
 				//	hash(x,y,z,v) = (v & 1) ? 0 : 255; // green
 				}
+	*/
 
 	//Offset table declaration
 	assert((u <= m*r) && (pgcd(m,r) == 1));								// Otherwise no injectivity of S -> (h0, h1) !
-	offsets.assign(r, r, 1, 3, 0);
+	offsets.assign(r, r, 1, 2, 0);
+	/*
 	for (int z = 0; z < offsets.dimz(); z++)
 		for (int y = 0; y < offsets.dimy(); y++)
 			for (int x = 0; x < offsets.dimx(); x++)
 				offsets(x,y,z,2) = 255; // set the blue, it will be cleared when filled 
 				
+	*/
 	cout << "Offset table: " << r << "x" << r << endl;
 
 	//Calcul des cardinaux des ensembles h1^(-1)(q)
@@ -181,7 +185,7 @@ int PSH::perfect_hashing(CImg<unsigned char> &hash, CImg<unsigned char> &offsets
 			}
 			offsets(x,y,0,0) = off_x;
 			offsets(x,y,0,1) = off_y;
-			offsets(x,y,0,2) = 0; // clear the blue to mark as filled
+			//offsets(x,y,0,2) = 0; // clear the blue to mark as filled
 
 			//Hash table assignment
 			for (unsigned int s=0; s<points.size(); ++s)
